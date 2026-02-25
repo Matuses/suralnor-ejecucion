@@ -329,6 +329,59 @@
   .photo-slot.has-photo .photo-placeholder { display: none; }
   .photo-slot.has-photo .photo-check    { display: flex; }
 
+  .cam-icon-wrap {
+    width: 64px; height: 64px;
+    background: rgba(245,200,0,0.1);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 4px;
+    color: var(--yellow);
+  }
+
+  .cam-btn {
+    background: var(--yellow);
+    color: var(--black);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    margin-top: 8px;
+    pointer-events: none;
+  }
+
+  .photo-retake {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    display: none;
+    z-index: 4;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .photo-slot.has-photo .photo-retake { display: block; }
+
+  /* RESPONSIVE MEJORAS */
+  @media (max-width: 360px) {
+    .role-cards { grid-template-columns: 1fr; }
+    .photo-grid { grid-template-columns: 1fr; }
+    .cam-btn { font-size: 12px; padding: 7px 12px; }
+  }
+
+  @media (min-width: 481px) {
+    main { padding: 32px 24px; }
+    .role-card { padding: 36px 20px 28px; }
+  }
+
   /* DATETIME */
   .datetime-display {
     background: var(--dark);
@@ -577,30 +630,38 @@
         <div class="photo-slot" id="slot1">
           <input type="file" accept="image/*" capture="environment" id="foto1Input" onchange="handlePhoto(this, 1)">
           <div class="photo-placeholder">
-            <svg class="photo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
-              <circle cx="12" cy="13" r="4"/>
-            </svg>
+            <div class="cam-icon-wrap">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </div>
             <div class="photo-label-text">Antes de la ejecución</div>
+            <div class="cam-btn">📷 Tomar foto</div>
           </div>
           <img class="photo-preview" id="preview1">
           <div class="photo-check">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
+          <div class="photo-retake" onclick="retakePhoto(event, 1)">🔄 Cambiar</div>
         </div>
         <div class="photo-slot" id="slot2">
           <input type="file" accept="image/*" capture="environment" id="foto2Input" onchange="handlePhoto(this, 2)">
           <div class="photo-placeholder">
-            <svg class="photo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
-              <circle cx="12" cy="13" r="4"/>
-            </svg>
+            <div class="cam-icon-wrap">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </div>
             <div class="photo-label-text">Después de la ejecución</div>
+            <div class="cam-btn">📷 Tomar foto</div>
           </div>
           <img class="photo-preview" id="preview2">
           <div class="photo-check">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
+          <div class="photo-retake" onclick="retakePhoto(event, 2)">🔄 Cambiar</div>
         </div>
       </div>
     </div>
@@ -641,7 +702,7 @@
 
 <script>
   const CONFIG = {
-    SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwKgzqusXfCsLdc4-Rz32jYLbXNEJvjdXYpgswa9SSNCKs8ySka41lz2ezGKii1FTaOUg/exec'
+    SCRIPT_URL: 'TU_GOOGLE_APPS_SCRIPT_URL_AQUI'
   };
 
   const PROMOTORES = [
@@ -777,7 +838,16 @@
     reader.readAsDataURL(file);
   }
 
-  function compressImage(dataUrl, callback) {
+  function retakePhoto(event, num) {
+    event.stopPropagation();
+    const input = document.getElementById(`foto${num}Input`);
+    input.value = '';
+    document.getElementById(`slot${num}`).classList.remove('has-photo');
+    document.getElementById(`preview${num}`).src = '';
+    if (num === 1) foto1Data = null; else foto2Data = null;
+    updateProgress();
+    input.click();
+  }
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
@@ -854,11 +924,18 @@
 
     showLoading('Subiendo fotos...');
     try {
-      const res  = await fetch(CONFIG.SCRIPT_URL, { method:'POST', body: JSON.stringify(payload) });
-      const data = await res.json();
+      const formData = new FormData();
+      formData.append('data', JSON.stringify(payload));
+      
+      await fetch(CONFIG.SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+      });
+      
       hideLoading();
-      if (data.success) { showScreen('successScreen'); window.scrollTo({ top: 0 }); }
-      else showToast('Error: ' + (data.error || 'desconocido'), 'error');
+      showScreen('successScreen');
+      window.scrollTo({ top: 0 });
     } catch(err) {
       hideLoading();
       showToast('Error de conexión. Verificá el internet.', 'error');
