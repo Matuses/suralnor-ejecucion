@@ -848,6 +848,8 @@
     updateProgress();
     input.click();
   }
+
+  function compressImage(dataUrl, callback) {
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
