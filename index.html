@@ -920,42 +920,9 @@
       timestamp: now.toISOString()
     };
 
-    if (CONFIG.SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbwKgzqusXfCsLdc4-Rz32jYLbXNEJvjdXYpgswa9SSNCKs8ySka41lz2ezGKii1FTaOUg/exec') {
-      showLoading('Procesando...');
-      await sleep(1800);
-      hideLoading();
-      showScreen('successScreen');
-      window.scrollTo({ top: 0 });
-      return;
-    }
-
     showLoading('Enviando registro...');
     try {
-      // Enviamos sin fotos primero (las fotos son muy grandes para URL)
-      const payloadSinFotos = {...payload};
-      delete payloadSinFotos.foto1;
-      delete payloadSinFotos.foto2;
-
-      const url = CONFIG.SCRIPT_URL + '?data=' + encodeURIComponent(JSON.stringify(payloadSinFotos));
-
-      await fetch(url, { method: 'GET', mode: 'no-cors' });
-
-      // Ahora enviamos las fotos por separado si existen
-      if (foto1Data || foto2Data) {
-        showLoading('Subiendo fotos...');
-        const payloadFotos = {
-          rol: payload.rol,
-          nombre: payload.nombre,
-          cliente: payload.cliente,
-          timestamp: payload.timestamp,
-          soloFotos: true,
-          foto1: foto1Data || '',
-          foto2: foto2Data || ''
-        };
-        const urlFotos = CONFIG.SCRIPT_URL + '?data=' + encodeURIComponent(JSON.stringify(payloadFotos));
-        await fetch(urlFotos, { method: 'GET', mode: 'no-cors' });
-      }
-
+      await enviarPorIframe(CONFIG.SCRIPT_URL, payload);
       hideLoading();
       showScreen('successScreen');
       window.scrollTo({ top: 0 });
@@ -963,6 +930,48 @@
       hideLoading();
       showToast('Error de conexión. Verificá el internet.', 'error');
     }
+  }
+
+  function enviarPorIframe(url, data) {
+    return new Promise((resolve) => {
+      // Crear iframe oculto
+      const iframe = document.createElement('iframe');
+      iframe.name = 'hidden_iframe';
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+
+      // Crear formulario oculto
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = url;
+      form.target = 'hidden_iframe';
+
+      // Agregar datos como campo oculto
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'data';
+      input.value = JSON.stringify(data);
+      form.appendChild(input);
+
+      document.body.appendChild(form);
+
+      // Esperar que el iframe cargue
+      iframe.onload = () => {
+        setTimeout(() => {
+          document.body.removeChild(form);
+          document.body.removeChild(iframe);
+          resolve();
+        }, 500);
+      };
+
+      // Timeout de seguridad
+      setTimeout(() => {
+        try { document.body.removeChild(form); document.body.removeChild(iframe); } catch(e) {}
+        resolve();
+      }, 8000);
+
+      form.submit();
+    });
   }
 
   function resetAll() {
