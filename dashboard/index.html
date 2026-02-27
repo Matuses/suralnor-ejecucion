@@ -1008,12 +1008,15 @@
     const mapsUrl = hasGeo ? `https://www.google.com/maps?q=${lat},${lng}` : null;
 
     // Fotos
-    const fotoAntesHtml = r.fotoAntes && r.fotoAntes !== 'Sin foto'
-      ? `<img src="${r.fotoAntes}" alt="Antes" onclick="openLightbox('${r.fotoAntes}')">`
+    const imgAntes    = driveUrl(r.fotoAntes);
+    const imgDespues  = driveUrl(r.fotoDespues);
+
+    const fotoAntesHtml = imgAntes
+      ? `<img src="${imgAntes}" alt="Antes" onclick="openLightbox('${imgAntes}')">`
       : `<div class="photo-no-img">Sin foto</div>`;
 
-    const fotoDespuesHtml = r.fotoDespues && r.fotoDespues !== 'Sin foto'
-      ? `<img src="${r.fotoDespues}" alt="Después" onclick="openLightbox('${r.fotoDespues}')">`
+    const fotoDespuesHtml = imgDespues
+      ? `<img src="${imgDespues}" alt="Después" onclick="openLightbox('${imgDespues}')">`
       : `<div class="photo-no-img">Sin foto</div>`;
 
     document.getElementById('modalBody').innerHTML = `
@@ -1022,7 +1025,7 @@
         <div class="modal-field"><label>Código Cliente</label><p>${r.cliente}</p></div>
         <div class="modal-field"><label>Fecha</label><p>${r.fecha}</p></div>
         <div class="modal-field"><label>Hora</label><p>${r.hora}</p></div>
-        <div class="modal-field"><label>Precisión GPS</label><p>±${r.precision ? r.precision + 'm' : 'N/A'}</p></div>
+        <div class="modal-field"><label>Precisión GPS</label><p>${r.precision && r.precision !== 'N/A' ? '±' + r.precision + 'm' : 'N/A'}</p></div>
         <div class="modal-field"><label>Coordenadas</label><p style="font-family:'DM Mono',monospace;font-size:12px">${r.lat}, ${r.lng}</p></div>
       </div>
 
@@ -1067,7 +1070,13 @@
     if (modalMap) { modalMap.remove(); modalMap = null; }
   }
 
-  // ── LIGHTBOX ──
+  function driveUrl(url) {
+    if (!url || url === 'Sin foto') return null;
+    // Convertir URL de Drive a URL de visualización directa
+    const match = url.match(/[-\w]{25,}/);
+    if (match) return `https://drive.google.com/thumbnail?id=${match[0]}&sz=w800`;
+    return url;
+  }
   function openLightbox(src) {
     document.getElementById('lightboxImg').src = src;
     document.getElementById('lightbox').classList.add('show');
