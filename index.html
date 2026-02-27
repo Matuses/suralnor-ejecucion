@@ -613,8 +613,8 @@
     <div class="section-title">Punto de Venta</div>
     <div class="card">
       <div class="form-group">
-        <label>Razón Social</label>
-        <input type="text" id="clienteInput" placeholder="Ingrese la razón social del cliente" oninput="updateProgress()" autocomplete="off">
+        <label>Código del Cliente</label>
+        <input type="text" id="clienteInput" placeholder="Ingrese el código del cliente" oninput="updateProgress()" autocomplete="off">
       </div>
     </div>
 
@@ -642,7 +642,7 @@
     <div class="card">
       <div class="photo-grid">
         <div class="photo-slot" id="slot1">
-          <input type="file" accept="image/*" capture="environment" id="foto1Input" onchange="handlePhoto(this, 1)">
+          <input type="file" accept="image/*" id="foto1Input" onchange="handlePhoto(this, 1)">
           <div class="photo-placeholder">
             <div class="cam-icon-wrap">
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -660,7 +660,7 @@
           <div class="photo-retake" onclick="retakePhoto(event, 1)">🔄 Cambiar</div>
         </div>
         <div class="photo-slot" id="slot2">
-          <input type="file" accept="image/*" capture="environment" id="foto2Input" onchange="handlePhoto(this, 2)">
+          <input type="file" accept="image/*" id="foto2Input" onchange="handlePhoto(this, 2)">
           <div class="photo-placeholder">
             <div class="cam-icon-wrap">
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
