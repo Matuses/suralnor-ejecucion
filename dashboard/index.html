@@ -1127,13 +1127,14 @@
     const imgDespues  = driveUrl(r.fotoDespues);
 
     const allImgs = [imgAntes, imgDespues].filter(Boolean);
+    const allImgsJson = JSON.stringify(allImgs).replace(/"/g, '&quot;');
 
     const fotoAntesHtml = imgAntes
-      ? `<img src="${imgAntes}" alt="Antes" onclick="openLightbox('${imgAntes}', ${JSON.stringify(allImgs)})">`
+      ? `<img src="${imgAntes}" alt="Antes" style="cursor:pointer" onclick="openLightbox(this.src, JSON.parse(this.dataset.all))" data-all="${allImgsJson}">`
       : `<div class="photo-no-img">Sin foto</div>`;
 
     const fotoDespuesHtml = imgDespues
-      ? `<img src="${imgDespues}" alt="Después" onclick="openLightbox('${imgDespues}', ${JSON.stringify(allImgs)})">`
+      ? `<img src="${imgDespues}" alt="Después" style="cursor:pointer" onclick="openLightbox(this.src, JSON.parse(this.dataset.all))" data-all="${allImgsJson}">`
       : `<div class="photo-no-img">Sin foto</div>`;
 
     document.getElementById('modalBody').innerHTML = `
