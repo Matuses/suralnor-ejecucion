@@ -723,11 +723,11 @@
         <div class="stat-value accent" id="statHoy">—</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Promotores</div>
+        <div class="stat-label">Promotores activos</div>
         <div class="stat-value" id="statPromotores">—</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Merchands</div>
+        <div class="stat-label">Merchands activos</div>
         <div class="stat-value" id="statMerchands">—</div>
       </div>
       <div class="stat-card">
@@ -935,6 +935,13 @@
       const text = await res.text();
       allData = parseCSV(text);
       populateNombreFilter();
+      // Mapa muestra solo hoy por defecto
+      const hoy = new Date();
+      const hoyISO = hoy.toISOString().split('T')[0];
+      if (!document.getElementById('filterDesde').value) {
+        document.getElementById('filterDesde').value = hoyISO;
+        document.getElementById('filterHasta').value = hoyISO;
+      }
       applyFilters();
       document.getElementById('statActualizado').textContent = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
     } catch (err) {
@@ -952,9 +959,9 @@
         nro:          cols[0]  || '',
         fecha:        cols[1]  || '',
         hora:         cols[2]  || '',
-        rol:          cols[3]  || '',
-        nombre:       cols[4]  || '',
-        cliente:      cols[5]  || '',
+        rol:          (cols[3]  || '').trim(),
+        nombre:       (cols[4]  || '').trim().toUpperCase(),
+        cliente:      (cols[5]  || '').trim(),
         lat:          cols[6]  || '',
         lng:          cols[7]  || '',
         precision:    cols[8]  || '',
@@ -1025,10 +1032,12 @@
 
   function updateStats() {
     const hoy = new Date().toLocaleDateString('es-AR');
+    const promotores = new Set(allData.filter(r => r.rol.toLowerCase().includes('promotor')).map(r => r.nombre));
+    const merchands  = new Set(allData.filter(r => r.rol.toLowerCase().includes('merchand')).map(r => r.nombre));
     document.getElementById('statTotal').textContent = allData.length;
     document.getElementById('statHoy').textContent = allData.filter(r => r.fecha === hoy).length;
-    document.getElementById('statPromotores').textContent = allData.filter(r => r.rol.toLowerCase().includes('promotor')).length;
-    document.getElementById('statMerchands').textContent = allData.filter(r => r.rol.toLowerCase().includes('merchand')).length;
+    document.getElementById('statPromotores').textContent = promotores.size;
+    document.getElementById('statMerchands').textContent = merchands.size;
   }
 
   function renderList(data) {
