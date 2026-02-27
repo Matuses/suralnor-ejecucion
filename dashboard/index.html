@@ -1018,9 +1018,16 @@
         <div class="modal-field"><label>Coordenadas</label><p style="font-family:'DM Mono',monospace;font-size:12px">${r.lat}, ${r.lng}</p></div>
       </div>
 
-      ${mapsUrl ? `<a class="btn-maps" href="${mapsUrl}" target="_blank">📍 Ver en Google Maps</a>` : ''}
-
-      <div id="modalMapContainer" style="height:200px;border-radius:10px;overflow:hidden;margin-bottom:20px;border:1px solid var(--border);${hasGeo ? '' : 'display:none'}"></div>
+      ${mapsUrl ? `
+        <a class="btn-maps" href="${mapsUrl}" target="_blank">📍 Ver en Google Maps</a>
+        <div style="border-radius:10px;overflow:hidden;margin-bottom:20px;border:1px solid var(--border);height:200px;">
+          <iframe
+            src="https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed"
+            width="100%" height="200" style="border:0;display:block"
+            allowfullscreen loading="lazy">
+          </iframe>
+        </div>
+      ` : ''}
 
       <div class="photos-grid">
         <div class="photo-card">
@@ -1040,22 +1047,7 @@
     `;
 
     document.getElementById('modalOverlay').classList.add('show');
-
-    // Mini mapa en el modal
-    setTimeout(() => {
-      if (modalMap) { modalMap.remove(); modalMap = null; }
-      if (hasGeo) {
-        const container = document.getElementById('modalMapContainer');
-        if (container) {
-          container.style.display = 'block';
-          // Recrear el div del mapa para evitar conflictos
-          container.innerHTML = '<div id="modalMapEl" style="height:100%;width:100%"></div>';
-          modalMap = L.map('modalMapEl').setView([lat, lng], 15);
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(modalMap);
-          L.marker([lat, lng]).addTo(modalMap);
-        }
-      }
-    }, 200);
+    if (modalMap) { modalMap.remove(); modalMap = null; }
   }
 
   function closeModal(e) {
@@ -1065,8 +1057,6 @@
   function closeModalDirect() {
     document.getElementById('modalOverlay').classList.remove('show');
     if (modalMap) { modalMap.remove(); modalMap = null; }
-    const container = document.getElementById('modalMapContainer');
-    if (container) { container.innerHTML = ''; container.style.display = 'none'; }
   }
 
   // ── LIGHTBOX ──
