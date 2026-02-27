@@ -1014,11 +1014,13 @@
         <div class="modal-field"><label>Código Cliente</label><p>${r.cliente}</p></div>
         <div class="modal-field"><label>Fecha</label><p>${r.fecha}</p></div>
         <div class="modal-field"><label>Hora</label><p>${r.hora}</p></div>
-        <div class="modal-field"><label>Precisión GPS</label><p>±${r.precision}m</p></div>
+        <div class="modal-field"><label>Precisión GPS</label><p>±${r.precision ? r.precision + 'm' : 'N/A'}</p></div>
         <div class="modal-field"><label>Coordenadas</label><p style="font-family:'DM Mono',monospace;font-size:12px">${r.lat}, ${r.lng}</p></div>
       </div>
 
       ${mapsUrl ? `<a class="btn-maps" href="${mapsUrl}" target="_blank">📍 Ver en Google Maps</a>` : ''}
+
+      <div id="modalMapContainer" style="height:200px;border-radius:10px;overflow:hidden;margin-bottom:20px;border:1px solid var(--border);${hasGeo ? '' : 'display:none'}"></div>
 
       <div class="photos-grid">
         <div class="photo-card">
@@ -1041,25 +1043,19 @@
 
     // Mini mapa en el modal
     setTimeout(() => {
+      if (modalMap) { modalMap.remove(); modalMap = null; }
       if (hasGeo) {
-        if (!document.getElementById('modalMapEl')) {
-          const mapDiv = document.createElement('div');
-          mapDiv.id = 'modalMapEl';
-          mapDiv.className = 'modal-map';
-          const obsEl = document.querySelector('.modal-obs');
-          const target = obsEl ? obsEl.parentNode : document.getElementById('modalBody');
-          if (obsEl) target.insertBefore(mapDiv, obsEl.previousSibling);
-          else target.appendChild(mapDiv);
-        }
-        if (modalMap) { modalMap.remove(); modalMap = null; }
-        const el = document.getElementById('modalMapEl');
-        if (el) {
+        const container = document.getElementById('modalMapContainer');
+        if (container) {
+          container.style.display = 'block';
+          // Recrear el div del mapa para evitar conflictos
+          container.innerHTML = '<div id="modalMapEl" style="height:100%;width:100%"></div>';
           modalMap = L.map('modalMapEl').setView([lat, lng], 15);
           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(modalMap);
           L.marker([lat, lng]).addTo(modalMap);
         }
       }
-    }, 100);
+    }, 200);
   }
 
   function closeModal(e) {
@@ -1069,8 +1065,8 @@
   function closeModalDirect() {
     document.getElementById('modalOverlay').classList.remove('show');
     if (modalMap) { modalMap.remove(); modalMap = null; }
-    const el = document.getElementById('modalMapEl');
-    if (el) el.remove();
+    const container = document.getElementById('modalMapContainer');
+    if (container) { container.innerHTML = ''; container.style.display = 'none'; }
   }
 
   // ── LIGHTBOX ──
