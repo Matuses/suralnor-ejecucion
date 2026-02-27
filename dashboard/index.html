@@ -651,6 +651,36 @@
 
   .lightbox-close:hover { opacity: 1; }
 
+  .lightbox-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    font-size: 48px;
+    line-height: 1;
+    padding: 10px 18px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.2s;
+    z-index: 1;
+  }
+
+  .lightbox-arrow:hover { background: rgba(255,255,255,0.3); }
+  .lightbox-arrow.left  { left: 16px; }
+  .lightbox-arrow.right { right: 16px; }
+
+  .lightbox-counter {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.7);
+    font-size: 14px;
+    font-weight: 500;
+  }
+
   /* Force Leaflet below modal */
   .leaflet-pane,
   .leaflet-control,
@@ -802,7 +832,10 @@
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">×</button>
+  <button class="lightbox-arrow left" onclick="event.stopPropagation(); lightboxNav(-1)">&#8249;</button>
   <img id="lightboxImg" src="" alt="">
+  <button class="lightbox-arrow right" onclick="event.stopPropagation(); lightboxNav(1)">&#8250;</button>
+  <div class="lightbox-counter" id="lightboxCounter"></div>
 </div>
 
 <script>
@@ -952,23 +985,37 @@
   function parseCSV(text) {
     const lines = text.trim().split('\n');
     if (lines.length < 2) return [];
-    // headers: N°,Fecha,Hora,Rol,Nombre,Cliente,Lat,Lng,Precision,FotoAntes,FotoDespues,Observaciones,Timestamp
+    const headers = splitCSVLine(lines[0]).map(h => h.trim().toLowerCase());
+    const idx = (name) => headers.findIndex(h => h.includes(name));
+    const iNro    = idx('n') !== -1 ? 0 : 0;
+    const iFecha  = idx('fecha');
+    const iHora   = idx('hora');
+    const iRol    = idx('rol');
+    const iNombre = idx('nombre');
+    const iCliente= idx('raz') !== -1 ? idx('raz') : idx('digo') !== -1 ? idx('digo') : idx('cliente');
+    const iLat    = idx('latitud');
+    const iLng    = idx('longitud');
+    const iPrec   = idx('precis');
+    const iAntes  = idx('antes');
+    const iDesp   = idx('desp');
+    const iObs    = idx('observ');
+    const iTs     = idx('timestamp');
     return lines.slice(1).map(line => {
       const cols = splitCSVLine(line);
       return {
-        nro:          cols[0]  || '',
-        fecha:        cols[1]  || '',
-        hora:         cols[2]  || '',
-        rol:          (cols[3]  || '').trim(),
-        nombre:       (cols[4]  || '').trim().toUpperCase(),
-        cliente:      (cols[5]  || '').trim(),
-        lat:          cols[6]  || '',
-        lng:          cols[7]  || '',
-        precision:    cols[8]  || '',
-        fotoAntes:    cols[9]  || '',
-        fotoDespues:  cols[10] || '',
-        observaciones:cols[11] || '',
-        timestamp:    cols[12] || ''
+        nro:           cols[iNro]     || '',
+        fecha:         cols[iFecha]   || '',
+        hora:          cols[iHora]    || '',
+        rol:           (cols[iRol]    || '').trim(),
+        nombre:        (cols[iNombre] || '').trim().toUpperCase(),
+        cliente:       (cols[iCliente]|| '').trim(),
+        lat:           cols[iLat]     || '',
+        lng:           cols[iLng]     || '',
+        precision:     cols[iPrec]    || '',
+        fotoAntes:     cols[iAntes]   || '',
+        fotoDespues:   cols[iDesp]    || '',
+        observaciones: cols[iObs]     || '',
+        timestamp:     cols[iTs]      || ''
       };
     }).filter(r => r.nombre);
   }
@@ -1079,12 +1126,14 @@
     const imgAntes    = driveUrl(r.fotoAntes);
     const imgDespues  = driveUrl(r.fotoDespues);
 
+    const allImgs = [imgAntes, imgDespues].filter(Boolean);
+
     const fotoAntesHtml = imgAntes
-      ? `<img src="${imgAntes}" alt="Antes" onclick="openLightbox('${imgAntes}')">`
+      ? `<img src="${imgAntes}" alt="Antes" onclick="openLightbox('${imgAntes}', ${JSON.stringify(allImgs)})">`
       : `<div class="photo-no-img">Sin foto</div>`;
 
     const fotoDespuesHtml = imgDespues
-      ? `<img src="${imgDespues}" alt="Después" onclick="openLightbox('${imgDespues}')">`
+      ? `<img src="${imgDespues}" alt="Después" onclick="openLightbox('${imgDespues}', ${JSON.stringify(allImgs)})">`
       : `<div class="photo-no-img">Sin foto</div>`;
 
     document.getElementById('modalBody').innerHTML = `
@@ -1145,14 +1194,38 @@
     if (match) return `https://drive.google.com/thumbnail?id=${match[0]}&sz=w800`;
     return url;
   }
-  function openLightbox(src) {
-    document.getElementById('lightboxImg').src = src;
+  let lightboxImages = [];
+  let lightboxIndex  = 0;
+
+  function openLightbox(src, all) {
+    lightboxImages = all || [src];
+    lightboxIndex  = lightboxImages.indexOf(src);
+    if (lightboxIndex === -1) lightboxIndex = 0;
+    updateLightbox();
     document.getElementById('lightbox').classList.add('show');
+  }
+
+  function updateLightbox() {
+    document.getElementById('lightboxImg').src = lightboxImages[lightboxIndex];
+    document.getElementById('lightboxCounter').textContent =
+      lightboxImages.length > 1 ? `${lightboxIndex + 1} / ${lightboxImages.length}` : '';
+  }
+
+  function lightboxNav(dir) {
+    lightboxIndex = (lightboxIndex + dir + lightboxImages.length) % lightboxImages.length;
+    updateLightbox();
   }
 
   function closeLightbox() {
     document.getElementById('lightbox').classList.remove('show');
   }
+
+  document.addEventListener('keydown', e => {
+    if (!document.getElementById('lightbox').classList.contains('show')) return;
+    if (e.key === 'ArrowRight') lightboxNav(1);
+    if (e.key === 'ArrowLeft')  lightboxNav(-1);
+    if (e.key === 'Escape')     closeLightbox();
+  });
 </script>
 </body>
 </html>
