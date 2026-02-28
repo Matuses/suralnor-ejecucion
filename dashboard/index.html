@@ -868,6 +868,10 @@
     if (u === CREDENTIALS.user && p === CREDENTIALS.pass) {
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
+      document.getElementById('filterRol').value = '';
+      document.getElementById('filterNombre').value = '';
+      document.getElementById('filterDesde').value = '';
+      document.getElementById('filterHasta').value = '';
       initMap();
       loadData();
     } else {
@@ -980,13 +984,6 @@
       const text = await res.text();
       allData = parseCSV(text);
       populateNombreFilter();
-      // Mapa muestra solo hoy por defecto
-      const hoy = new Date();
-      const hoyISO = hoy.toISOString().split('T')[0];
-      if (!document.getElementById('filterDesde').value) {
-        document.getElementById('filterDesde').value = hoyISO;
-        document.getElementById('filterHasta').value = hoyISO;
-      }
       applyFilters();
       document.getElementById('statActualizado').textContent = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
     } catch (err) {
