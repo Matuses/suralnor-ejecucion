@@ -900,20 +900,22 @@
     markers.forEach(m => map.removeLayer(m));
     markers = [];
 
-    // Si no hay filtro de fecha, mostrar solo hoy
+    // Si no hay filtro de fecha, mostrar solo hoy; si hay filtro, usar los datos que llegan
     const desde = document.getElementById('filterDesde').value;
     const hasta = document.getElementById('filterHasta').value;
     const hoy = new Date().toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
-    let dataFiltrada;
-    if (!desde && !hasta) {
-      dataFiltrada = data.filter(r => r.fecha === hoy);
-      document.getElementById('mapCount').textContent = dataFiltrada.filter(r => r.lat && r.lat !== 'N/A').length + ' puntos hoy';
-    } else {
-      dataFiltrada = data;
-      document.getElementById('mapCount').textContent = dataFiltrada.filter(r => r.lat && r.lat !== 'N/A').length + ' puntos';
-    }
-    const valid = dataFiltrada.filter(r => r.lat && r.lat !== 'N/A');
+    
+    const dataFiltrada = (!desde && !hasta) ? data.filter(r => r.fecha === hoy) : data;
+    const label = (!desde && !hasta) ? ' puntos hoy' : ' puntos';
+    
+    const valid = dataFiltrada.filter(r => {
+      if (!r.lat || !r.lng) return false;
+      const lat = parseFloat(r.lat.toString().replace(',', '.'));
+      const lng = parseFloat(r.lng.toString().replace(',', '.'));
+      return !isNaN(lat) && !isNaN(lng);
+    });
 
+    document.getElementById('mapCount').textContent = valid.length + label;
     if (valid.length === 0) { renderLegend({}, []); return; }
 
     // Color único por persona
