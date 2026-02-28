@@ -900,11 +900,19 @@
     markers.forEach(m => map.removeLayer(m));
     markers = [];
 
-    // El mapa solo muestra registros de hoy
+    // Si no hay filtro de fecha, mostrar solo hoy
+    const desde = document.getElementById('filterDesde').value;
+    const hasta = document.getElementById('filterHasta').value;
     const hoy = new Date().toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
-    const dataHoy = data.filter(r => r.fecha === hoy);
-    const valid = dataHoy.filter(r => r.lat && r.lat !== 'N/A');
-    document.getElementById('mapCount').textContent = valid.length + ' puntos hoy';
+    let dataFiltrada;
+    if (!desde && !hasta) {
+      dataFiltrada = data.filter(r => r.fecha === hoy);
+      document.getElementById('mapCount').textContent = dataFiltrada.filter(r => r.lat && r.lat !== 'N/A').length + ' puntos hoy';
+    } else {
+      dataFiltrada = data;
+      document.getElementById('mapCount').textContent = dataFiltrada.filter(r => r.lat && r.lat !== 'N/A').length + ' puntos';
+    }
+    const valid = dataFiltrada.filter(r => r.lat && r.lat !== 'N/A');
 
     if (valid.length === 0) { renderLegend({}, []); return; }
 
@@ -912,7 +920,7 @@
     const COLORS = ['#E53935','#8E24AA','#1E88E5','#00897B','#F4511E','#6D4C41','#039BE5','#43A047','#FB8C00','#D81B60','#3949AB','#00ACC1'];
     const personColors = {};
     let colorIdx = 0;
-    dataHoy.forEach(r => {
+    dataFiltrada.forEach(r => {
       if (!personColors[r.nombre]) {
         personColors[r.nombre] = COLORS[colorIdx % COLORS.length];
         colorIdx++;
