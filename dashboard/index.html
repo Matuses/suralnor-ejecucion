@@ -135,58 +135,69 @@
   /* TOPBAR */
   .topbar {
     background: var(--navy);
-    padding: 0 24px;
-    height: 64px;
+    padding: 0 16px;
+    height: auto;
+    min-height: 56px;
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 10px;
     position: sticky;
     top: 0;
     z-index: 100;
     box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+    flex-wrap: wrap;
+    padding-top: 10px;
+    padding-bottom: 10px;
   }
 
   .topbar-logo {
-    width: 42px; height: 42px;
+    width: 36px; height: 36px;
     border-radius: 50%; object-fit: cover;
     border: 2px solid var(--accent);
+    flex-shrink: 0;
   }
 
   .topbar-title {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
     color: white;
     letter-spacing: 0.3px;
+    flex: 1;
+    min-width: 0;
   }
 
   .topbar-title span {
     display: block;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 400;
     color: rgba(255,255,255,0.5);
     letter-spacing: 1px;
     text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .topbar-right {
     margin-left: auto;
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 8px;
+    flex-shrink: 0;
   }
 
   .topbar-refresh {
     background: rgba(255,255,255,0.1);
     border: 1px solid rgba(255,255,255,0.2);
     color: white;
-    border-radius: 8px;
-    padding: 7px 14px;
-    font-size: 13px;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
     font-family: 'DM Sans', sans-serif;
-    display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; gap: 4px;
   }
 
   .topbar-refresh:hover { background: rgba(255,255,255,0.2); }
@@ -195,10 +206,11 @@
     background: transparent;
     border: none;
     color: rgba(255,255,255,0.5);
-    font-size: 13px;
+    font-size: 12px;
     cursor: pointer;
     font-family: 'DM Sans', sans-serif;
     transition: color 0.2s;
+    white-space: nowrap;
   }
 
   .topbar-logout:hover { color: white; }
