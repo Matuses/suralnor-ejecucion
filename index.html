@@ -707,7 +707,7 @@
     <div class="success-screen show">
       <div class="success-icon">✓</div>
       <h2>¡Registrado!</h2>
-      <p>Las fotos y datos fueron enviados correctamente al sistema.</p>
+      <p id="successMsg">Las fotos y datos fueron enviados correctamente al sistema.</p>
       <button class="btn-new" onclick="resetAll()">Nuevo registro</button>
     </div>
   </div>
@@ -929,15 +929,30 @@
       timestamp: now.toISOString()
     };
 
+    // Verificar conexión
+    if (!navigator.onLine) {
+      guardarEnCola(payload);
+      hideLoading();
+      document.getElementById('successMsg').textContent = '⚠️ Sin internet. El registro se guardó en el celular y se enviará automáticamente cuando vuelva la conexión.';
+      showScreen('successScreen');
+      window.scrollTo({ top: 0 });
+      return;
+    }
+
     showLoading('Enviando registro...');
     try {
       await enviarPorIframe(CONFIG.SCRIPT_URL, payload);
       hideLoading();
+      document.getElementById('successMsg').textContent = 'Las fotos y datos fueron enviados correctamente al sistema.';
+      enviarCola();
       showScreen('successScreen');
       window.scrollTo({ top: 0 });
     } catch(err) {
+      guardarEnCola(payload);
       hideLoading();
-      showToast('Error de conexión. Verificá el internet.', 'error');
+      document.getElementById('successMsg').textContent = '⚠️ Sin internet. El registro se guardó en el celular y se enviará automáticamente cuando vuelva la conexión.';
+      showScreen('successScreen');
+      window.scrollTo({ top: 0 });
     }
   }
 
@@ -982,6 +997,73 @@
       form.submit();
     });
   }
+
+  // ── COLA OFFLINE ──
+  function guardarEnCola(payload) {
+    const cola = JSON.parse(localStorage.getItem('colaPendiente') || '[]');
+    cola.push(payload);
+    localStorage.setItem('colaPendiente', JSON.stringify(cola));
+    actualizarBadgeOffline();
+  }
+
+  async function enviarCola() {
+    const cola = JSON.parse(localStorage.getItem('colaPendiente') || '[]');
+    if (cola.length === 0) return;
+    const pendientes = [...cola];
+    localStorage.removeItem('colaPendiente');
+    actualizarBadgeOffline();
+    for (const payload of pendientes) {
+      try {
+        await enviarPorIframe(CONFIG.SCRIPT_URL, payload);
+      } catch(e) {
+        guardarEnCola(payload);
+      }
+    }
+  }
+
+  function actualizarBadgeOffline() {
+    const cola = JSON.parse(localStorage.getItem('colaPendiente') || '[]');
+    let badge = document.getElementById('offlineBadge');
+    if (!badge) {
+      badge = document.createElement('div');
+      badge.id = 'offlineBadge';
+      badge.style.cssText = 'position:fixed;bottom:16px;left:16px;background:#E67E22;color:white;border-radius:20px;padding:8px 14px;font-size:13px;font-weight:600;z-index:500;display:none;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
+      document.body.appendChild(badge);
+    }
+    if (cola.length > 0) {
+      badge.textContent = `📤 ${cola.length} registro${cola.length > 1 ? 's' : ''} pendiente${cola.length > 1 ? 's' : ''} de envío`;
+      badge.style.display = 'block';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  function actualizarEstadoConexion() {
+    let indicator = document.getElementById('onlineIndicator');
+    if (!indicator) {
+      indicator = document.createElement('div');
+      indicator.id = 'onlineIndicator';
+      indicator.style.cssText = 'position:fixed;bottom:16px;right:16px;border-radius:20px;padding:7px 14px;font-size:12px;font-weight:600;z-index:500;box-shadow:0 4px 12px rgba(0,0,0,0.15);transition:all 0.3s;';
+      document.body.appendChild(indicator);
+    }
+    if (navigator.onLine) {
+      indicator.textContent = '🟢 En línea';
+      indicator.style.background = '#E8F5E9';
+      indicator.style.color = '#1B8A4A';
+      enviarCola();
+    } else {
+      indicator.textContent = '🔴 Sin internet';
+      indicator.style.background = '#FFEBEE';
+      indicator.style.color = '#C62828';
+    }
+  }
+
+  window.addEventListener('online',  actualizarEstadoConexion);
+  window.addEventListener('offline', actualizarEstadoConexion);
+  window.addEventListener('load', () => {
+    actualizarEstadoConexion();
+    actualizarBadgeOffline();
+  });
 
   function resetAll() {
     foto1Data = null; foto2Data = null; geoData = null; currentRole = null;
