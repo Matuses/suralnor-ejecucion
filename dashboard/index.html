@@ -900,16 +900,19 @@
     markers.forEach(m => map.removeLayer(m));
     markers = [];
 
-    const valid = data.filter(r => r.lat && r.lat !== 'N/A' && !isNaN(parseFloat(r.lat)));
-    document.getElementById('mapCount').textContent = valid.length + ' puntos';
+    // El mapa solo muestra registros de hoy
+    const hoy = new Date().toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
+    const dataHoy = data.filter(r => r.fecha === hoy);
+    const valid = dataHoy.filter(r => r.lat && r.lat !== 'N/A');
+    document.getElementById('mapCount').textContent = valid.length + ' puntos hoy';
 
-    if (valid.length === 0) return;
+    if (valid.length === 0) { renderLegend({}, []); return; }
 
     // Color único por persona
     const COLORS = ['#E53935','#8E24AA','#1E88E5','#00897B','#F4511E','#6D4C41','#039BE5','#43A047','#FB8C00','#D81B60','#3949AB','#00ACC1'];
     const personColors = {};
     let colorIdx = 0;
-    data.forEach(r => {
+    dataHoy.forEach(r => {
       if (!personColors[r.nombre]) {
         personColors[r.nombre] = COLORS[colorIdx % COLORS.length];
         colorIdx++;
@@ -1087,7 +1090,7 @@
   }
 
   function updateStats() {
-    const hoy = new Date().toLocaleDateString('es-AR');
+    const hoy = new Date().toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
     const promotores = new Set(allData.filter(r => r.rol.toLowerCase().includes('promotor')).map(r => r.nombre));
     const merchands  = new Set(allData.filter(r => r.rol.toLowerCase().includes('merchand')).map(r => r.nombre));
     document.getElementById('statTotal').textContent = allData.length;
