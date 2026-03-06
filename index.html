@@ -749,71 +749,119 @@
 
   // ── GUARDAR / RESTAURAR PROGRESO ──
   function guardarProgreso() {
-    const progreso = {
-      rol: currentRole,
-      nombre: document.getElementById('nombreSelect').value,
-      cliente: document.getElementById('clienteInput').value,
-      observaciones: document.getElementById('observaciones').value,
-      foto1: foto1Data,
-      foto2: foto2Data,
-      geo: geoData,
-      timestamp: Date.now()
+    try {
+      const progreso = {
+        rol: currentRole,
+        nombre: document.getElementById('nombreSelect').value,
+        cliente: document.getElementById('clienteInput').value,
+        observaciones: document.getElementById('observaciones').value,
+        geo: geoData,
+        timestamp: Date.now()
+      };
+      localStorage.setItem('progresoFormulario', JSON.stringify(progreso));
+
+      // Guardar fotos con compresión extra para ahorrar espacio
+      if (foto1Data) {
+        comprimirParaGuardar(foto1Data, data => {
+          try { localStorage.setItem('progresoFoto1', data); } catch(e) {}
+        });
+      } else {
+        localStorage.removeItem('progresoFoto1');
+      }
+      if (foto2Data) {
+        comprimirParaGuardar(foto2Data, data => {
+          try { localStorage.setItem('progresoFoto2', data); } catch(e) {}
+        });
+      } else {
+        localStorage.removeItem('progresoFoto2');
+      }
+    } catch(e) {
+      console.warn('Error guardando progreso:', e);
+    }
+  }
+
+  function comprimirParaGuardar(dataUrl, callback) {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const max = 600; // Más pequeño para el localStorage
+      let w = img.width, h = img.height;
+      if (w > max || h > max) {
+        if (w > h) { h = Math.round(h * max / w); w = max; }
+        else { w = Math.round(w * max / h); h = max; }
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      callback(canvas.toDataURL('image/jpeg', 0.5));
     };
-    localStorage.setItem('progresoFormulario', JSON.stringify(progreso));
+    img.src = dataUrl;
   }
 
   function restaurarProgreso() {
-    const raw = localStorage.getItem('progresoFormulario');
-    if (!raw) return;
-    const progreso = JSON.parse(raw);
+    try {
+      const raw = localStorage.getItem('progresoFormulario');
+      if (!raw) return;
+      const progreso = JSON.parse(raw);
 
-    // Si tiene más de 24hs, descartar
-    if (Date.now() - progreso.timestamp > 24 * 60 * 60 * 1000) {
-      localStorage.removeItem('progresoFormulario');
-      return;
-    }
-
-    if (!progreso.rol) return;
-
-    // Preguntar si quiere continuar
-    const mins = Math.round((Date.now() - progreso.timestamp) / 60000);
-    const confirmar = confirm(`Tenés un registro sin terminar de hace ${mins} minuto${mins !== 1 ? 's' : ''}.\n¿Querés continuar donde dejaste?`);
-    if (!confirmar) {
-      localStorage.removeItem('progresoFormulario');
-      return;
-    }
-
-    // Restaurar rol
-    selectRole(progreso.rol);
-
-    // Restaurar campos
-    setTimeout(() => {
-      if (progreso.nombre) document.getElementById('nombreSelect').value = progreso.nombre;
-      if (progreso.cliente) document.getElementById('clienteInput').value = progreso.cliente;
-      if (progreso.observaciones) document.getElementById('observaciones').value = progreso.observaciones;
-
-      // Restaurar fotos
-      if (progreso.foto1) {
-        foto1Data = progreso.foto1;
-        document.getElementById('preview1').src = progreso.foto1;
-        document.getElementById('slot1').classList.add('has-photo');
-      }
-      if (progreso.foto2) {
-        foto2Data = progreso.foto2;
-        document.getElementById('preview2').src = progreso.foto2;
-        document.getElementById('slot2').classList.add('has-photo');
+      // Si tiene más de 24hs, descartar
+      if (Date.now() - progreso.timestamp > 24 * 60 * 60 * 1000) {
+        limpiarProgreso();
+        return;
       }
 
-      // Restaurar geo
-      if (progreso.geo) {
-        geoData = progreso.geo;
-        if (geoData.lat !== 'N/A') {
-          setGeoDot('ok', `<strong style="color:var(--text)">${geoData.lat.toFixed ? geoData.lat.toFixed(5) : geoData.lat}, ${geoData.lng.toFixed ? geoData.lng.toFixed(5) : geoData.lng}</strong><br><span style="font-size:12px">Precisión: ±${geoData.acc}m</span>`);
+      if (!progreso.rol) return;
+
+      // Preguntar si quiere continuar
+      const mins = Math.round((Date.now() - progreso.timestamp) / 60000);
+      const confirmar = confirm(`Tenés un registro sin terminar de hace ${mins} minuto${mins !== 1 ? 's' : ''}.\n¿Querés continuar donde dejaste?`);
+      if (!confirmar) {
+        limpiarProgreso();
+        return;
+      }
+
+      // Restaurar rol
+      selectRole(progreso.rol);
+
+      // Restaurar campos
+      setTimeout(() => {
+        if (progreso.nombre) document.getElementById('nombreSelect').value = progreso.nombre;
+        if (progreso.cliente) document.getElementById('clienteInput').value = progreso.cliente;
+        if (progreso.observaciones) document.getElementById('observaciones').value = progreso.observaciones;
+
+        // Restaurar fotos
+        const f1 = localStorage.getItem('progresoFoto1');
+        const f2 = localStorage.getItem('progresoFoto2');
+        if (f1) {
+          foto1Data = f1;
+          document.getElementById('preview1').src = f1;
+          document.getElementById('slot1').classList.add('has-photo');
         }
-      }
+        if (f2) {
+          foto2Data = f2;
+          document.getElementById('preview2').src = f2;
+          document.getElementById('slot2').classList.add('has-photo');
+        }
 
-      updateProgress();
-    }, 300);
+        // Restaurar geo
+        if (progreso.geo) {
+          geoData = progreso.geo;
+          if (geoData.lat !== 'N/A') {
+            setGeoDot('ok', `<strong style="color:var(--text)">${geoData.lat.toFixed ? geoData.lat.toFixed(5) : geoData.lat}, ${geoData.lng.toFixed ? geoData.lng.toFixed(5) : geoData.lng}</strong><br><span style="font-size:12px">Precisión: ±${geoData.acc}m</span>`);
+          }
+        }
+
+        updateProgress();
+      }, 300);
+    } catch(e) {
+      console.warn('Error restaurando progreso:', e);
+      limpiarProgreso();
+    }
+  }
+
+  function limpiarProgreso() {
+    limpiarProgreso();
+    localStorage.removeItem('progresoFoto1');
+    localStorage.removeItem('progresoFoto2');
   }
 
   // Guardar progreso cada vez que cambia algo
@@ -1022,7 +1070,7 @@
     showLoading('Enviando registro...');
     try {
       await enviarPorIframe(CONFIG.SCRIPT_URL, payload);
-      localStorage.removeItem('progresoFormulario');
+      limpiarProgreso();
       hideLoading();
       document.getElementById('successMsg').textContent = 'Las fotos y datos fueron enviados correctamente al sistema.';
       enviarCola();
@@ -1147,7 +1195,7 @@
   });
 
   function resetAll() {
-    localStorage.removeItem('progresoFormulario');
+    limpiarProgreso();
     foto1Data = null; foto2Data = null; geoData = null; currentRole = null;
     document.getElementById('nombreSelect').value = '';
     document.getElementById('clienteInput').value = '';
