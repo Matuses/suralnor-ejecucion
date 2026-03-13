@@ -1,7 +1,10 @@
-const CACHE = 'suralnor-v1';
+const CACHE = 'suralnor-v2';
 const ARCHIVOS = [
   '/suralnor-ejecucion/',
-  '/suralnor-ejecucion/index.html'
+  '/suralnor-ejecucion/index.html',
+  '/suralnor-ejecucion/manifest.json',
+  '/suralnor-ejecucion/icon-192.png',
+  '/suralnor-ejecucion/icon-512.png'
 ];
 
 self.addEventListener('install', e => {
