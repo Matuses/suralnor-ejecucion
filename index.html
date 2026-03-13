@@ -561,6 +561,9 @@
   <div class="header-badge none" id="headerBadge">—</div>
   </div>
 </header>
+<button id="btnInstalar" onclick="instalarApp()" style="display:none;position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:#0D2E5A;color:white;border:none;border-radius:24px;padding:12px 24px;font-size:14px;font-weight:600;z-index:400;box-shadow:0 4px 16px rgba(0,0,0,0.3);align-items:center;gap:8px;white-space:nowrap;">
+  📲 Instalar app en el celular
+</button>
 
 <div class="role-strip" id="roleStrip"></div>
 
@@ -886,6 +889,25 @@
   setInterval(updateClock, 1000);
   // Restaurar progreso al abrir la app
   window.addEventListener('load', restaurarProgreso);
+
+  // PWA install
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('btnInstalar').style.display = 'flex';
+  });
+  function instalarApp() {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      document.getElementById('btnInstalar').style.display = 'none';
+    });
+  }
+  window.addEventListener('appinstalled', () => {
+    document.getElementById('btnInstalar').style.display = 'none';
+  });
 
   // Geo
   function getGeo() {
