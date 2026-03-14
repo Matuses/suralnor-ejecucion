@@ -1,0 +1,22 @@
+{
+  "name": "Panel de Supervisores - Emcala",
+  "short_name": "Panel AS",
+  "description": "Dashboard de supervisores - Tareas de Ejecución Canal AS",
+  "start_url": "/suralnor-dashboard/",
+  "display": "standalone",
+  "background_color": "#F0F4FA",
+  "theme_color": "#0D2E5A",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
