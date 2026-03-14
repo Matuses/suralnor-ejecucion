@@ -1,12 +1,13 @@
 {
-  "name": "Tareas de Ejecución Canal AS",
-  "short_name": "Ejecución AS",
-  "description": "Registro de tareas de ejecución Suralnor / Emcala",
-  "start_url": "/suralnor-ejecucion/",
+  "name": "Panel de Supervisores - Emcala",
+  "short_name": "Panel AS",
+  "description": "Dashboard de supervisores - Tareas de Ejecución Canal AS",
+  "start_url": "./index.html",
+  "scope": "/suralnor-ejecucion/dashboard/",
   "display": "standalone",
-  "background_color": "#F0F4F8",
+  "background_color": "#F0F4FA",
   "theme_color": "#0D2E5A",
-  "orientation": "portrait",
+  "orientation": "any",
   "icons": [
     {
       "src": "icon-192.png",
