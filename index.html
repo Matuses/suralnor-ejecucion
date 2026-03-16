@@ -1069,6 +1069,11 @@
 
   // Submit
   async function submitForm() {
+    // Deshabilitar botón inmediatamente para evitar doble envío
+    const btnSubmit = document.getElementById('btnSubmit');
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/></svg> Enviando...`;
+
     const nombre  = document.getElementById('nombreSelect').value;
     const cliente = document.getElementById('clienteInput').value.trim();
     const now = new Date();
@@ -1162,26 +1167,37 @@
   }
 
   // ── COLA OFFLINE ──
+  let enviandoCola = false;
+
   function guardarEnCola(payload) {
     const cola = JSON.parse(localStorage.getItem('colaPendiente') || '[]');
-    cola.push(payload);
-    localStorage.setItem('colaPendiente', JSON.stringify(cola));
+    // Evitar duplicados por timestamp
+    const yaExiste = cola.some(r => r.timestamp === payload.timestamp);
+    if (!yaExiste) {
+      cola.push(payload);
+      localStorage.setItem('colaPendiente', JSON.stringify(cola));
+    }
     actualizarBadgeOffline();
   }
 
   async function enviarCola() {
+    if (enviandoCola) return;
     const cola = JSON.parse(localStorage.getItem('colaPendiente') || '[]');
     if (cola.length === 0) return;
+    enviandoCola = true;
     const pendientes = [...cola];
     localStorage.removeItem('colaPendiente');
     actualizarBadgeOffline();
     for (const payload of pendientes) {
       try {
         await enviarPorIframe(CONFIG.SCRIPT_URL, payload);
+        await new Promise(r => setTimeout(r, 2000)); // esperar entre envíos
       } catch(e) {
         guardarEnCola(payload);
       }
     }
+    enviandoCola = false;
+    actualizarBadgeOffline();
   }
 
   function actualizarBadgeOffline() {
