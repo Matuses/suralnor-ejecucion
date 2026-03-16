@@ -1115,44 +1115,49 @@
   }
 
   function enviarPorIframe(url, data) {
-    return new Promise((resolve) => {
-      // Crear iframe oculto
-      const iframe = document.createElement('iframe');
-      iframe.name = 'hidden_iframe';
-      iframe.style.display = 'none';
-      document.body.appendChild(iframe);
+    // Intentar fetch primero (funciona en iOS Safari)
+    const jsonData = JSON.stringify(data);
+    
+    // Método 1: fetch con no-cors
+    return fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'data=' + encodeURIComponent(jsonData)
+    }).catch(() => {
+      // Método 2: fallback con iframe para Android
+      return new Promise((resolve) => {
+        const iframe = document.createElement('iframe');
+        iframe.name = 'hidden_iframe';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
 
-      // Crear formulario oculto
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = url;
-      form.target = 'hidden_iframe';
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = url;
+        form.target = 'hidden_iframe';
 
-      // Agregar datos como campo oculto
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'data';
-      input.value = JSON.stringify(data);
-      form.appendChild(input);
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'data';
+        input.value = jsonData;
+        form.appendChild(input);
+        document.body.appendChild(form);
 
-      document.body.appendChild(form);
+        iframe.onload = () => {
+          setTimeout(() => {
+            try { document.body.removeChild(form); document.body.removeChild(iframe); } catch(e) {}
+            resolve();
+          }, 500);
+        };
 
-      // Esperar que el iframe cargue
-      iframe.onload = () => {
         setTimeout(() => {
-          document.body.removeChild(form);
-          document.body.removeChild(iframe);
+          try { document.body.removeChild(form); document.body.removeChild(iframe); } catch(e) {}
           resolve();
-        }, 500);
-      };
+        }, 8000);
 
-      // Timeout de seguridad
-      setTimeout(() => {
-        try { document.body.removeChild(form); document.body.removeChild(iframe); } catch(e) {}
-        resolve();
-      }, 8000);
-
-      form.submit();
+        form.submit();
+      });
     });
   }
 
