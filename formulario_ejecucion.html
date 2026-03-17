@@ -657,8 +657,9 @@
     <div class="card">
       <div class="photo-grid">
         <div class="photo-slot" id="slot1">
-          <input type="file" accept="image/*" id="foto1Input" onchange="handlePhoto(this, 1)">
-          <div class="photo-placeholder">
+          <input type="file" accept="image/*" capture="environment" id="foto1CamInput" onchange="handlePhoto(this, 1)" style="display:none">
+          <input type="file" accept="image/*" id="foto1GalInput" onchange="handlePhoto(this, 1)" style="display:none">
+          <div class="photo-placeholder" id="placeholder1">
             <div class="cam-icon-wrap">
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
@@ -666,7 +667,10 @@
               </svg>
             </div>
             <div class="photo-label-text">Antes de la ejecución</div>
-            <div class="cam-btn">📷 Tomar foto</div>
+            <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;width:100%">
+              <div class="cam-btn" onclick="event.stopPropagation();document.getElementById('foto1CamInput').click()">📷 Sacar foto</div>
+              <div class="cam-btn" style="background:var(--border);color:var(--muted);" onclick="event.stopPropagation();document.getElementById('foto1GalInput').click()">🖼️ Elegir de galería</div>
+            </div>
           </div>
           <img class="photo-preview" id="preview1">
           <div class="photo-check">
@@ -1011,13 +1015,20 @@
 
   function retakePhoto(event, num) {
     event.stopPropagation();
-    const input = document.getElementById(`foto${num}Input`);
-    input.value = '';
+    if (num === 1) {
+      document.getElementById('foto1CamInput').value = '';
+      document.getElementById('foto1GalInput').value = '';
+      foto1Data = null;
+    } else {
+      const input = document.getElementById('foto2Input');
+      input.value = '';
+      foto2Data = null;
+    }
     document.getElementById(`slot${num}`).classList.remove('has-photo');
     document.getElementById(`preview${num}`).src = '';
-    if (num === 1) foto1Data = null; else foto2Data = null;
     updateProgress();
-    input.click();
+    autoGuardar();
+    if (num === 2) document.getElementById('foto2Input').click();
   }
 
   function compressImage(dataUrl, callback) {
