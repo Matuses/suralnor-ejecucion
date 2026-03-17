@@ -838,6 +838,14 @@
 
       if (!progreso.rol) return;
 
+      // Solo mostrar el cartel si hay al menos una foto guardada
+      const f1 = localStorage.getItem('progresoFoto1');
+      const f2 = localStorage.getItem('progresoFoto2');
+      if (!f1 && !f2) {
+        limpiarProgreso();
+        return;
+      }
+
       // Preguntar si quiere continuar
       const mins = Math.round((Date.now() - progreso.timestamp) / 60000);
       const confirmar = confirm(`Tenés un registro sin terminar de hace ${mins} minuto${mins !== 1 ? 's' : ''}.\n¿Querés continuar donde dejaste?`);
