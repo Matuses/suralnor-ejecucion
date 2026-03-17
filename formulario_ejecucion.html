@@ -728,6 +728,19 @@
        PANTALLA 3: ÉXITO
   ══════════════════════════════════ -->
   <div id="successScreen" class="screen">
+
+<!-- MODAL RESTAURAR PROGRESO -->
+<div id="modalRestaurar" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:white;border-radius:16px;padding:28px 24px;max-width:340px;width:100%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+    <div style="font-size:32px;margin-bottom:12px;">📋</div>
+    <div style="font-size:16px;font-weight:700;color:#1A2A3A;margin-bottom:8px;">Registro sin terminar</div>
+    <div id="modalRestaurarMsg" style="font-size:14px;color:#6B8BA4;margin-bottom:24px;line-height:1.5;"></div>
+    <div style="display:flex;gap:12px;">
+      <button onclick="rechazarRestaurar()" style="flex:1;padding:12px;border:2px solid #C5D5E8;border-radius:8px;background:white;color:#6B8BA4;font-size:14px;font-weight:600;cursor:pointer;">Descartar</button>
+      <button onclick="aceptarRestaurar()" style="flex:1;padding:12px;border:none;border-radius:8px;background:#1565C0;color:white;font-size:14px;font-weight:600;cursor:pointer;">Continuar</button>
+    </div>
+  </div>
+</div>
     <div class="success-screen show">
       <div class="success-icon">✓</div>
       <h2>¡Registrado!</h2>
@@ -846,51 +859,64 @@
         return;
       }
 
-      // Preguntar si quiere continuar
+      // Usar modal propio en vez de confirm() — iOS bloquea confirm() en PWA
       const mins = Math.round((Date.now() - progreso.timestamp) / 60000);
-      const confirmar = confirm(`Tenés un registro sin terminar de hace ${mins} minuto${mins !== 1 ? 's' : ''}.\n¿Querés continuar donde dejaste?`);
-      if (!confirmar) {
-        limpiarProgreso();
-        return;
-      }
-
-      // Restaurar rol
-      selectRole(progreso.rol);
-
-      // Restaurar campos
-      setTimeout(() => {
-        if (progreso.nombre) document.getElementById('nombreSelect').value = progreso.nombre;
-        if (progreso.cliente) document.getElementById('clienteInput').value = progreso.cliente;
-        if (progreso.observaciones) document.getElementById('observaciones').value = progreso.observaciones;
-
-        // Restaurar fotos
-        const f1 = localStorage.getItem('progresoFoto1');
-        const f2 = localStorage.getItem('progresoFoto2');
-        if (f1) {
-          foto1Data = f1;
-          document.getElementById('preview1').src = f1;
-          document.getElementById('slot1').classList.add('has-photo');
-        }
-        if (f2) {
-          foto2Data = f2;
-          document.getElementById('preview2').src = f2;
-          document.getElementById('slot2').classList.add('has-photo');
-        }
-
-        // Restaurar geo
-        if (progreso.geo) {
-          geoData = progreso.geo;
-          if (geoData.lat !== 'N/A') {
-            setGeoDot('ok', `<strong style="color:var(--text)">${geoData.lat.toFixed ? geoData.lat.toFixed(5) : geoData.lat}, ${geoData.lng.toFixed ? geoData.lng.toFixed(5) : geoData.lng}</strong><br><span style="font-size:12px">Precisión: ±${geoData.acc}m</span>`);
-          }
-        }
-
-        updateProgress();
-      }, 300);
+      mostrarModalRestaurar(mins, progreso);
     } catch(e) {
       console.warn('Error restaurando progreso:', e);
       limpiarProgreso();
     }
+  }
+
+  let _progresoGuardado = null;
+
+  function mostrarModalRestaurar(mins, progreso) {
+    _progresoGuardado = progreso;
+    document.getElementById('modalRestaurarMsg').textContent =
+      `Tenés un registro sin terminar de hace ${mins} minuto${mins !== 1 ? 's' : ''}. ¿Querés continuar donde dejaste?`;
+    const modal = document.getElementById('modalRestaurar');
+    modal.style.display = 'flex';
+  }
+
+  function rechazarRestaurar() {
+    document.getElementById('modalRestaurar').style.display = 'none';
+    _progresoGuardado = null;
+    limpiarProgreso();
+  }
+
+  function aceptarRestaurar() {
+    document.getElementById('modalRestaurar').style.display = 'none';
+    const progreso = _progresoGuardado;
+    _progresoGuardado = null;
+    if (!progreso) return;
+
+    selectRole(progreso.rol);
+    setTimeout(() => {
+      if (progreso.nombre) document.getElementById('nombreSelect').value = progreso.nombre;
+      if (progreso.cliente) document.getElementById('clienteInput').value = progreso.cliente;
+      if (progreso.observaciones) document.getElementById('observaciones').value = progreso.observaciones;
+
+      const f1 = localStorage.getItem('progresoFoto1');
+      const f2 = localStorage.getItem('progresoFoto2');
+      if (f1) {
+        foto1Data = f1;
+        document.getElementById('preview1').src = f1;
+        document.getElementById('slot1').classList.add('has-photo');
+      }
+      if (f2) {
+        foto2Data = f2;
+        document.getElementById('preview2').src = f2;
+        document.getElementById('slot2').classList.add('has-photo');
+      }
+
+      if (progreso.geo) {
+        geoData = progreso.geo;
+        if (geoData.lat !== 'N/A') {
+          setGeoDot('ok', `<strong style="color:var(--text)">${geoData.lat.toFixed ? geoData.lat.toFixed(5) : geoData.lat}, ${geoData.lng.toFixed ? geoData.lng.toFixed(5) : geoData.lng}</strong><br><span style="font-size:12px">Precisión: ±${geoData.acc}m</span>`);
+        }
+      }
+      updateProgress();
+    }, 300);
   }
 
   function limpiarProgreso() {
@@ -1026,12 +1052,35 @@
       document.getElementById(`preview${num}`).src = e.target.result;
       document.getElementById(`slot${num}`).classList.add('has-photo');
       compressImage(e.target.result, result => {
-        if (num === 1) foto1Data = result; else foto2Data = result;
+        if (num === 1) {
+          foto1Data = result;
+          // Guardar foto del antes en la galería (solo Android)
+          guardarEnGaleria(result, 'foto_antes');
+        } else {
+          foto2Data = result;
+        }
         updateProgress();
         autoGuardar();
       });
     };
     reader.readAsDataURL(file);
+  }
+
+  function guardarEnGaleria(dataUrl, nombre) {
+    // Solo funciona en Android, en iOS no hace nada
+    try {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      if (isIOS) return;
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `${nombre}_${Date.now()}.jpg`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => document.body.removeChild(link), 1000);
+    } catch(e) {
+      console.warn('No se pudo guardar en galería:', e);
+    }
   }
 
   function retakePhoto(event, num) {
