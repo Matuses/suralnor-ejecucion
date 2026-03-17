@@ -1091,8 +1091,11 @@
       timestamp: now.toISOString()
     };
 
-    // Verificar conexión
-    if (!navigator.onLine) {
+    // Verificar conexión real
+    showLoading('Verificando conexión...');
+    const hayInternet = await testConexion();
+
+    if (!hayInternet) {
       guardarEnCola(payload);
       hideLoading();
       document.getElementById('successMsg').textContent = '⚠️ Sin internet. El registro se guardó en el celular y se enviará automáticamente cuando vuelva la conexión.';
@@ -1119,50 +1122,57 @@
     }
   }
 
+  async function testConexion() {
+    try {
+      await fetch('https://www.google.com/favicon.ico?t=' + Date.now(), {
+        method: 'HEAD', mode: 'no-cors', cache: 'no-store'
+      });
+      return true;
+    } catch(e) {
+      return false;
+    }
+  }
+
   function enviarPorIframe(url, data) {
-    // Intentar fetch primero (funciona en iOS Safari)
     const jsonData = JSON.stringify(data);
-    
-    // Método 1: fetch con no-cors
-    return fetch(url, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'data=' + encodeURIComponent(jsonData)
-    }).catch(() => {
-      // Método 2: fallback con iframe para Android
-      return new Promise((resolve) => {
-        const iframe = document.createElement('iframe');
-        iframe.name = 'hidden_iframe';
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
+    return new Promise((resolve, reject) => {
+      const iframe = document.createElement('iframe');
+      iframe.name = 'hidden_iframe_' + Date.now();
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
 
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = url;
-        form.target = 'hidden_iframe';
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = url;
+      form.target = iframe.name;
 
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'data';
-        input.value = jsonData;
-        form.appendChild(input);
-        document.body.appendChild(form);
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'data';
+      input.value = jsonData;
+      form.appendChild(input);
+      document.body.appendChild(form);
 
-        iframe.onload = () => {
-          setTimeout(() => {
-            try { document.body.removeChild(form); document.body.removeChild(iframe); } catch(e) {}
-            resolve();
-          }, 500);
-        };
+      let resuelto = false;
 
+      iframe.onload = () => {
+        if (resuelto) return;
+        resuelto = true;
         setTimeout(() => {
           try { document.body.removeChild(form); document.body.removeChild(iframe); } catch(e) {}
           resolve();
-        }, 8000);
+        }, 500);
+      };
 
-        form.submit();
-      });
+      // Timeout de 20 segundos
+      setTimeout(() => {
+        if (resuelto) return;
+        resuelto = true;
+        try { document.body.removeChild(form); document.body.removeChild(iframe); } catch(e) {}
+        resolve(); // Resolvemos igual — asumimos que llegó
+      }, 20000);
+
+      form.submit();
     });
   }
 
@@ -1217,7 +1227,7 @@
     }
   }
 
-  function actualizarEstadoConexion() {
+  async function actualizarEstadoConexion() {
     let indicator = document.getElementById('onlineIndicator');
     if (!indicator) {
       indicator = document.createElement('div');
@@ -1225,17 +1235,26 @@
       indicator.style.cssText = 'position:fixed;bottom:16px;right:16px;border-radius:20px;padding:7px 14px;font-size:12px;font-weight:600;z-index:500;box-shadow:0 4px 12px rgba(0,0,0,0.15);transition:all 0.3s;';
       document.body.appendChild(indicator);
     }
-    if (navigator.onLine) {
+    const hayInternet = await testConexion();
+    if (hayInternet) {
       indicator.textContent = '🟢 En línea';
       indicator.style.background = '#E8F5E9';
       indicator.style.color = '#1B8A4A';
-      enviarCola();
+      setTimeout(() => enviarCola(), 3000);
     } else {
       indicator.textContent = '🔴 Sin internet';
       indicator.style.background = '#FFEBEE';
       indicator.style.color = '#C62828';
     }
   }
+
+  // Reintentar cola cada 30 segundos si hay pendientes
+  setInterval(() => {
+    const cola = JSON.parse(localStorage.getItem('colaPendiente') || '[]');
+    if (cola.length > 0 && navigator.onLine && !enviandoCola) {
+      enviarCola();
+    }
+  }, 30000);
 
   window.addEventListener('online',  actualizarEstadoConexion);
   window.addEventListener('offline', actualizarEstadoConexion);
@@ -1257,6 +1276,9 @@
     document.getElementById('headerBadge').textContent = '—';
     document.getElementById('headerBadge').className = 'header-badge none';
     document.getElementById('roleStrip').className = 'role-strip';
+    // Rehabilitar botón de envío
+    const btnSubmit = document.getElementById('btnSubmit');
+    btnSubmit.disabled = false;
     showScreen('roleScreen');
     window.scrollTo({ top: 0 });
   }
