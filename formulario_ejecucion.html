@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Tareas de Ejecución Canal AS Emcala</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D2E5A">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ejecución AS">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/suralnor-ejecucion/sw.js').catch(() => {});
+  }
+</script>
+
+<style>
+  :root {
+    --yellow: #1565C0;
+    --yellow-dark: #0D47A1;
+    --black: #F0F4F8;
+    --dark: #E3EAF2;
+    --card: #FFFFFF;
+    --border: #C5D5E8;
+    --text: #1A2A3A;
+    --muted: #6B8BA4;
+    --success: #1B8A4A;
+    --error: #C62828;
+    --error-dim: rgba(198,40,40,0.25);
+    --blue: #1976D2;
+    --accent: #1565C0;
+    --header-bg: #0D2E5A;
+    --header-text: #FFFFFF;
+    --btn-text: #FFFFFF;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #EEF3FA;
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  /* HEADER */
+  header {
+    background: #0D2E5A;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid #1976D2;
+  }
+
+  .header-inner {
+    max-width: 480px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .header-logo-img {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #1976D2;
+    flex-shrink: 0;
+  }
+
+  .header-text { display: flex; flex-direction: column; gap: 2px; }
+
+  .header-logo {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.5px;
+    font-weight: 900;
+    font-size: 18px;
+    color: #FFFFFF;
+    letter-spacing: 1px;
+    line-height: 1.1;
+  }
+
+  .header-logo span {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    margin-top: 3px;
+  }
+
+  .header-badge {
+    margin-left: auto;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.5px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .header-badge.promotor { background: #1976D2; color: #fff; }
+  .header-badge.merchand  { background: #0288D1; color: #fff; }
+  .header-badge.none      { background: #90A4AE; color: #fff; }
+
+  /* MAIN */
+  main { max-width: 480px; margin: 0 auto; padding: 24px 16px; }
+
+  /* ── PANTALLA ROL ── */
+  #roleScreen { text-align: center; padding: 32px 0 0; }
+
+  .role-subtitle {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text);
+    margin-top: -20px;
+    margin-bottom: 32px;
+    opacity: 0.7;
+  }
+
+  .role-title {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.5px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+
+  .role-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .role-card {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 16px 24px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .role-card:active { transform: scale(0.96); }
+
+  .role-card.promotor:hover, .role-card.promotor:focus {
+    border-color: #1565C0;
+    background: rgba(21,101,192,0.06);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(21,101,192,0.2);
+  }
+
+  .role-card.merchand:hover, .role-card.merchand:focus {
+    border-color: var(--blue);
+    background: rgba(26,111,196,0.08);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(26,111,196,0.2);
+  }
+
+  .role-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+  }
+
+  .role-icon.promotor { background: rgba(21,101,192,0.1); }
+  .role-icon.merchand { background: rgba(26,111,196,0.15); }
+
+  .role-name {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.5px;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .role-name.promotor { color: #1565C0; }
+  .role-name.merchand { color: #5aabff; }
+
+  .role-desc {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* ── FORM ── */
+  .section-title {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.5px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #1565C0;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .card {
+    background: #FFFFFF;
+    border: 1px solid #C5D5E8;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  select, input[type="text"] {
+    width: 100%;
+    background: var(--dark);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 16px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 40px;
+  }
+
+  select:focus, input[type="text"]:focus { border-color: #1565C0; }
+  select option { background: var(--dark); }
+
+  .form-group { margin-bottom: 16px; }
+  .form-group:last-child { margin-bottom: 0; }
+
+  /* GEO */
+  .geo-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--dark);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+
+  .geo-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--muted);
+    flex-shrink: 0;
+    transition: background 0.3s;
+  }
+  .geo-dot.ok      { background: var(--success); box-shadow: 0 0 8px var(--success); }
+  .geo-dot.error   { background: var(--error); }
+  .geo-dot.loading { animation: pulse 1s infinite; background: #1976D2; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* PHOTOS */
+  .photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .photo-slot {
+    position: relative;
+    aspect-ratio: 3/4;
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    background: var(--dark);
+  }
+  .photo-slot:hover { border-color: #1565C0; }
+  .photo-slot.has-photo { border-style: solid; border-color: #1565C0; }
+
+  .photo-slot input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
+    width: 100%; height: 100%; z-index: 2;
+  }
+
+  .photo-placeholder {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 8px;
+    pointer-events: none;
+  }
+
+  .photo-icon { width: 40px; height: 40px; opacity: 0.3; }
+
+  .photo-label-text {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.5px;
+    font-size: 13px; font-weight: 600;
+    letter-spacing: 1px; text-transform: uppercase;
+    color: var(--muted); text-align: center; padding: 0 8px;
+  }
+
+  .photo-preview {
+    position: absolute; inset: 0;
+    object-fit: cover; width: 100%; height: 100%; display: none;
+  }
+
+  .photo-check {
+    position: absolute; top: 8px; right: 8px;
+    width: 24px; height: 24px;
+    background: var(--success); border-radius: 50%;
+    display: none; align-items: center; justify-content: center; z-index: 3;
+  }
+
+  .photo-slot.has-photo .photo-preview  { display: block; }
+  .photo-slot.has-photo .photo-placeholder { display: none; }
+  .photo-slot.has-photo .photo-check    { display: flex; }
+
+  .cam-icon-wrap {
+    width: 64px; height: 64px;
+    background: rgba(21,101,192,0.1);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 4px;
+    color: #1565C0;
+  }
+
+  .cam-btn {
+    background: #1565C0;
+    color: #FFFFFF;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.5px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    margin-top: 8px;
+    pointer-events: none;
+  }
+
+  .photo-retake {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    display: none;
+    z-index: 4;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .photo-slot.has-photo .photo-retake { display: block; }
+
+  /* RESPONSIVE MEJORAS */
+  @media (max-width: 360px) {
+    .role-cards { grid-template-columns: 1fr; }
+    .photo-grid { grid-template-columns: 1fr; }
+    .cam-btn { font-size: 12px; padding: 7px 12px; }
+  }
+
+  @media (min-width: 481px) {
+    main { padding: 32px 24px; }
+    .role-card { padding: 36px 20px 28px; }
+  }
+
+  /* DATETIME */
+  .datetime-display {
+    background: var(--dark);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.5px;
+    font-size: 18px; font-weight: 600; letter-spacing: 1px;
+    color: #1565C0;
+  }
+  .datetime-display span {
+    display: block; font-size: 12px; font-weight: 400;
+    color: var(--muted); letter-spacing: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin-top: 2px;
+  }
+
+  /* BACK BUTTON */
+  .btn-back {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.5px;
+    font-size: 13px; font-weight: 600;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 8px 14px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 6px;
+    transition: all 0.2s;
+  }
+  .btn-back:hover { border-color: var(--text); color: var(--text); }
+
+  /* SUBMIT */
+  .btn-submit {
+    width: 100%;
+    background: #1565C0;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.5px;
+    font-size: 18px; font-weight: 900;
+    letter-spacing: 2px; text-transform: uppercase;
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .btn-submit:hover { background: #0D47A1; transform: translateY(-1px); }
+  .btn-submit:active { transform: translateY(0); }
+  .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* PROGRESS */
+  .progress-bar {
+    height: 3px; background: var(--border); border-radius: 2px;
+    margin-bottom: 24px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: #1565C0; border-radius: 2px;
+    transition: width 0.4s ease; width: 0%;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 20px;
+    font-size: 14px; font-weight: 500;
+    z-index: 200; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    max-width: 90vw; text-align: center;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: var(--success); color: var(--success); }
+  .toast.error   { border-color: var(--error);   color: var(--error); }
+
+  /* SUCCESS */
+  .success-screen { display: none; text-align: center; padding: 40px 20px; }
+  .success-screen.show { display: block; }
+  .success-icon {
+    width: 80px; height: 80px; background: var(--success); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px; font-size: 36px;
+  }
+  .success-screen h2 {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.5px;
+    font-size: 32px; font-weight: 900; color: #1B8A4A; margin-bottom: 8px;
+  }
+  .success-screen p { color: var(--muted); margin-bottom: 32px; font-size: 15px; }
+  .btn-new {
+    background: transparent; border: 2px solid #1976D2; color: var(--yellow);
+    border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.5px;
+    font-size: 16px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    padding: 14px 32px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-new:hover { background: #1565C0; color: #FFFFFF; }
+
+  /* LOADING */
+  .loading-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.8); z-index: 150;
+    flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+  }
+  .loading-overlay.show { display: flex; }
+  .loading-text {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.5px;
+    font-size: 18px; font-weight: 600; letter-spacing: 2px;
+    color: #FFFFFF; text-transform: uppercase;
+  }
+  .big-spinner {
+    width: 48px; height: 48px;
+    border: 4px solid rgba(255,255,255,0.2);
+    border-top-color: #FFFFFF; border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* SCREEN TRANSITIONS */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Role indicator strip */
+  .role-strip {
+    display: none;
+    justify-content: center;
+    padding: 8px 16px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: 0.5px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .role-strip.promotor { background: rgba(21,101,192,0.08); color: #1565C0; }
+  .role-strip.merchand { background: rgba(26,111,196,0.1); color: #5aabff; }
+  .role-strip.show { display: flex; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <img class="header-logo-img" src="data:image/jpeg;base64,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" alt="Suralnor/Emcala">
+  <div class="header-text">
+    <div class="header-logo">
+      TAREAS DE EJECUCIÓN
+      <span>Canal AS · Suralnor / Emcala</span>
+    </div>
+  </div>
+  <div class="header-badge none" id="headerBadge">—</div>
+  </div>
+</header>
+<button id="btnInstalar" onclick="instalarApp()" style="display:none;position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:#0D2E5A;color:white;border:none;border-radius:24px;padding:12px 24px;font-size:14px;font-weight:600;z-index:400;box-shadow:0 4px 16px rgba(0,0,0,0.3);align-items:center;gap:8px;white-space:nowrap;">
+  📲 Instalar app en el celular
+</button>
+
+<div class="role-strip" id="roleStrip"></div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="big-spinner"></div>
+  <div class="loading-text" id="loadingText">Enviando...</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<main>
+
+  <!-- ══════════════════════════════════
+       PANTALLA 1: SELECCIÓN DE ROL
+  ══════════════════════════════════ -->
+  <div id="roleScreen" class="screen active">
+    <div class="role-title">REGISTRO DE TAREAS DE EJECUCIÓN</div>
+    <div class="role-subtitle">Seleccione su rol para continuar</div>
+    <div class="role-cards">
+
+      <div class="role-card promotor" onclick="selectRole('promotor')" tabindex="0">
+        <div class="role-icon promotor">🏷️</div>
+        <div class="role-name promotor">Promotor</div>
+        <div class="role-desc">Registro de tareas de ejecución</div>
+      </div>
+
+      <div class="role-card merchand" onclick="selectRole('merchand')" tabindex="0">
+        <div class="role-icon merchand">📦</div>
+        <div class="role-name merchand">Merchand</div>
+        <div class="role-desc">Registro de tareas de ejecución</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       PANTALLA 2: FORMULARIO
+  ══════════════════════════════════ -->
+  <div id="formScreen" class="screen">
+
+    <button class="btn-back" onclick="goBack()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      Cambiar rol
+    </button>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <!-- NOMBRE -->
+    <div class="section-title" id="sectionNombre">Identificación</div>
+    <div class="card">
+      <div class="form-group">
+        <label id="labelNombre">—</label>
+        <select id="nombreSelect" onchange="updateProgress(); autoGuardar();">
+          <option value="">— Seleccioná tu nombre —</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- CLIENTE -->
+    <div class="section-title">Punto de Venta</div>
+    <div class="card">
+      <div class="form-group">
+        <label>Código del Cliente</label>
+        <input type="text" id="clienteInput" placeholder="Ingrese el código del cliente" oninput="updateProgress(); autoGuardar();" autocomplete="off">
+      </div>
+    </div>
+
+    <!-- FECHA Y GEO -->
+    <div class="section-title">Fecha, hora y ubicación</div>
+    <div class="card">
+      <div class="form-group">
+        <label>Fecha y hora</label>
+        <div class="datetime-display" id="datetimeDisplay">
+          Cargando...
+          <span>Se registra automáticamente</span>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label>Geolocalización</label>
+        <div class="geo-status">
+          <div class="geo-dot loading" id="geoDot"></div>
+          <div id="geoText" style="font-size:13px;color:var(--muted)">Obteniendo ubicación...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVIDENCIA -->
+    <div class="section-title">Evidencia <span style="font-size:10px;color:var(--error);font-family:'Barlow',sans-serif;font-weight:600;letter-spacing:0;text-transform:none;">* Ambas fotos son obligatorias</span></div>
+    <div class="card">
+      <div class="photo-grid">
+        <div class="photo-slot" id="slot1">
+          <input type="file" accept="image/*" id="foto1Input" onchange="handlePhoto(this, 1)">
+          <div class="photo-placeholder">
+            <div class="cam-icon-wrap">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </div>
+            <div class="photo-label-text">Antes de la ejecución</div>
+            <div class="cam-btn">📷 Tomar foto</div>
+          </div>
+          <img class="photo-preview" id="preview1">
+          <div class="photo-check">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="photo-retake" onclick="retakePhoto(event, 1)">🔄 Cambiar</div>
+        </div>
+        <div class="photo-slot" id="slot2">
+          <input type="file" accept="image/*" capture="environment" id="foto2Input" onchange="handlePhoto(this, 2)">
+          <div class="photo-placeholder">
+            <div class="cam-icon-wrap">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </div>
+            <div class="photo-label-text">Después de la ejecución</div>
+            <div class="cam-btn">📷 Tomar foto</div>
+          </div>
+          <img class="photo-preview" id="preview2">
+          <div class="photo-check">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="photo-retake" onclick="retakePhoto(event, 2)">🔄 Cambiar</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OBSERVACIONES -->
+    <div class="section-title">Observaciones</div>
+    <div class="card">
+      <div class="form-group" style="margin-bottom:0">
+        <label>Comentarios adicionales (opcional)</label>
+        <textarea id="observaciones" placeholder="Ingrese cualquier observación relevante sobre la visita..." rows="4" style="width:100%;background:var(--dark);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Barlow',sans-serif;font-size:15px;padding:12px 14px;outline:none;resize:vertical;transition:border-color 0.2s;line-height:1.5;" onfocus="this.style.borderColor='var(--yellow)'" onblur="this.style.borderColor='var(--border)'"; oninput="autoGuardar()"></textarea>
+      </div>
+    </div>
+
+    <button class="btn-submit" id="btnSubmit" onclick="submitForm()" disabled>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 2 11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Enviar registro
+    </button>
+
+    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px;">
+      Los datos se guardan automáticamente en el sistema de Suralnor / Emcala
+    </p>
+
+  </div>
+
+  <!-- ══════════════════════════════════
+       PANTALLA 3: ÉXITO
+  ══════════════════════════════════ -->
+  <div id="successScreen" class="screen">
+    <div class="success-screen show">
+      <div class="success-icon">✓</div>
+      <h2>¡Registrado!</h2>
+      <p id="successMsg">Las fotos y datos fueron enviados correctamente al sistema.</p>
+      <button class="btn-new" onclick="resetAll()">Nuevo registro</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const CONFIG = {
+    SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwKgzqusXfCsLdc4-Rz32jYLbXNEJvjdXYpgswa9SSNCKs8ySka41lz2ezGKii1FTaOUg/exec'
+  };
+
+  const PROMOTORES = [
+    'AVILA EZEQUIEL',
+    'MIÑO RENZO',
+    'SANCHEZ ROCIO',
+    'FERREYRA LEONARDO',
+    'PERREN ANDREA',
+    'DIAZ VALERIA'
+  ];
+
+  const MERCHANDS = [
+    'CRUZ CHRISTIAN',
+    'DOMINGUEZ NAHUEL',
+    'GUARAZ JUAN',
+    'SMITH RODRIGO',
+    'THEILET NICOLAS',
+    'TORRES NICOLAS'
+  ];
+
+  let currentRole = null;
+  let geoData = null;
+  let foto1Data = null;
+  let foto2Data = null;
+
+  // ── GUARDAR / RESTAURAR PROGRESO ──
+  function guardarProgreso() {
+    try {
+      const progreso = {
+        rol: currentRole,
+        nombre: document.getElementById('nombreSelect').value,
+        cliente: document.getElementById('clienteInput').value,
+        observaciones: document.getElementById('observaciones').value,
+        geo: geoData,
+        timestamp: Date.now()
+      };
+      localStorage.setItem('progresoFormulario', JSON.stringify(progreso));
+
+      // Guardar fotos con compresión extra para ahorrar espacio
+      if (foto1Data) {
+        comprimirParaGuardar(foto1Data, data => {
+          try { localStorage.setItem('progresoFoto1', data); } catch(e) {}
+        });
+      } else {
+        localStorage.removeItem('progresoFoto1');
+      }
+      if (foto2Data) {
+        comprimirParaGuardar(foto2Data, data => {
+          try { localStorage.setItem('progresoFoto2', data); } catch(e) {}
+        });
+      } else {
+        localStorage.removeItem('progresoFoto2');
+      }
+    } catch(e) {
+      console.warn('Error guardando progreso:', e);
+    }
+  }
+
+  function comprimirParaGuardar(dataUrl, callback) {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const max = 600; // Más pequeño para el localStorage
+      let w = img.width, h = img.height;
+      if (w > max || h > max) {
+        if (w > h) { h = Math.round(h * max / w); w = max; }
+        else { w = Math.round(w * max / h); h = max; }
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      callback(canvas.toDataURL('image/jpeg', 0.5));
+    };
+    img.src = dataUrl;
+  }
+
+  function restaurarProgreso() {
+    try {
+      const raw = localStorage.getItem('progresoFormulario');
+      if (!raw) return;
+      const progreso = JSON.parse(raw);
+
+      // Si tiene más de 24hs, descartar
+      if (Date.now() - progreso.timestamp > 24 * 60 * 60 * 1000) {
+        limpiarProgreso();
+        return;
+      }
+
+      if (!progreso.rol) return;
+
+      // Preguntar si quiere continuar
+      const mins = Math.round((Date.now() - progreso.timestamp) / 60000);
+      const confirmar = confirm(`Tenés un registro sin terminar de hace ${mins} minuto${mins !== 1 ? 's' : ''}.\n¿Querés continuar donde dejaste?`);
+      if (!confirmar) {
+        limpiarProgreso();
+        return;
+      }
+
+      // Restaurar rol
+      selectRole(progreso.rol);
+
+      // Restaurar campos
+      setTimeout(() => {
+        if (progreso.nombre) document.getElementById('nombreSelect').value = progreso.nombre;
+        if (progreso.cliente) document.getElementById('clienteInput').value = progreso.cliente;
+        if (progreso.observaciones) document.getElementById('observaciones').value = progreso.observaciones;
+
+        // Restaurar fotos
+        const f1 = localStorage.getItem('progresoFoto1');
+        const f2 = localStorage.getItem('progresoFoto2');
+        if (f1) {
+          foto1Data = f1;
+          document.getElementById('preview1').src = f1;
+          document.getElementById('slot1').classList.add('has-photo');
+        }
+        if (f2) {
+          foto2Data = f2;
+          document.getElementById('preview2').src = f2;
+          document.getElementById('slot2').classList.add('has-photo');
+        }
+
+        // Restaurar geo
+        if (progreso.geo) {
+          geoData = progreso.geo;
+          if (geoData.lat !== 'N/A') {
+            setGeoDot('ok', `<strong style="color:var(--text)">${geoData.lat.toFixed ? geoData.lat.toFixed(5) : geoData.lat}, ${geoData.lng.toFixed ? geoData.lng.toFixed(5) : geoData.lng}</strong><br><span style="font-size:12px">Precisión: ±${geoData.acc}m</span>`);
+          }
+        }
+
+        updateProgress();
+      }, 300);
+    } catch(e) {
+      console.warn('Error restaurando progreso:', e);
+      limpiarProgreso();
+    }
+  }
+
+  function limpiarProgreso() {
+    limpiarProgreso();
+    localStorage.removeItem('progresoFoto1');
+    localStorage.removeItem('progresoFoto2');
+  }
+
+  // Guardar progreso cada vez que cambia algo
+  function autoGuardar() {
+    if (currentRole) guardarProgreso();
+  }
+  function updateClock() {
+    const now = new Date();
+    const fecha = now.toLocaleDateString('es-AR', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    const hora  = now.toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    const el = document.getElementById('datetimeDisplay');
+    if (el) el.innerHTML = `${hora}<span>${fecha}</span>`;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+  // Restaurar progreso al abrir la app
+  window.addEventListener('load', restaurarProgreso);
+
+  // PWA install
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('btnInstalar').style.display = 'flex';
+  });
+  function instalarApp() {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      document.getElementById('btnInstalar').style.display = 'none';
+    });
+  }
+  window.addEventListener('appinstalled', () => {
+    document.getElementById('btnInstalar').style.display = 'none';
+  });
+
+  // Geo
+  function getGeo() {
+    if (!navigator.geolocation) {
+      setGeoDot('error', 'GPS no disponible en este dispositivo');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        geoData = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: Math.round(pos.coords.accuracy) };
+        setGeoDot('ok', `<strong style="color:var(--text)">${geoData.lat.toFixed(5)}, ${geoData.lng.toFixed(5)}</strong><br><span style="font-size:12px">Precisión: ±${geoData.acc}m</span>`);
+        updateProgress();
+      },
+      err => {
+        const msgs = {1:'Permiso de ubicación denegado', 2:'Ubicación no disponible', 3:'Tiempo de espera agotado'};
+        setGeoDot('error', msgs[err.code] || 'Error de geolocalización');
+        geoData = { lat:'N/A', lng:'N/A', acc:'N/A' };
+        updateProgress();
+      },
+      { timeout:15000, enableHighAccuracy:true }
+    );
+  }
+
+  function setGeoDot(state, html) {
+    document.getElementById('geoDot').className = 'geo-dot ' + state;
+    document.getElementById('geoText').innerHTML = html;
+  }
+
+  // Role selection
+  function selectRole(role) {
+    currentRole = role;
+
+    // Populate select
+    const select = document.getElementById('nombreSelect');
+    select.innerHTML = '<option value="">— Seleccioná tu nombre —</option>';
+    const list = role === 'promotor' ? PROMOTORES : MERCHANDS;
+    list.forEach(n => {
+      const o = document.createElement('option');
+      o.textContent = n;
+      select.appendChild(o);
+    });
+
+    // Update labels
+    document.getElementById('labelNombre').textContent = role === 'promotor' ? 'Promotor' : 'Merchandiser';
+
+    // Badge
+    const badge = document.getElementById('headerBadge');
+    badge.textContent = role === 'promotor' ? 'Promotor' : 'Merchand';
+    badge.className = 'header-badge ' + role;
+
+    // Strip
+    const strip = document.getElementById('roleStrip');
+    strip.textContent = '● ' + (role === 'promotor' ? 'Modo Promotor' : 'Modo Merchandiser');
+    strip.className = 'role-strip ' + role + ' show';
+
+    showScreen('formScreen');
+    getGeo();
+    updateProgress();
+    window.scrollTo({ top: 0 });
+  }
+
+  function goBack() {
+    currentRole = null;
+    foto1Data = null; foto2Data = null;
+    geoData = null;
+    document.getElementById('nombreSelect').value = '';
+    document.getElementById('clienteInput').value = '';
+    document.getElementById('slot1').classList.remove('has-photo');
+    document.getElementById('slot2').classList.remove('has-photo');
+    document.getElementById('preview1').src = '';
+    document.getElementById('preview2').src = '';
+    document.getElementById('observaciones').value = '';
+    document.getElementById('headerBadge').textContent = '—';
+    document.getElementById('headerBadge').className = 'header-badge none';
+    document.getElementById('roleStrip').className = 'role-strip';
+    showScreen('roleScreen');
+    window.scrollTo({ top: 0 });
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  // Photos
+  function handlePhoto(input, num) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById(`preview${num}`).src = e.target.result;
+      document.getElementById(`slot${num}`).classList.add('has-photo');
+      compressImage(e.target.result, result => {
+        if (num === 1) foto1Data = result; else foto2Data = result;
+        updateProgress();
+        autoGuardar();
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function retakePhoto(event, num) {
+    event.stopPropagation();
+    const input = document.getElementById(`foto${num}Input`);
+    input.value = '';
+    document.getElementById(`slot${num}`).classList.remove('has-photo');
+    document.getElementById(`preview${num}`).src = '';
+    if (num === 1) foto1Data = null; else foto2Data = null;
+    updateProgress();
+    input.click();
+  }
+
+  function compressImage(dataUrl, callback) {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const maxW = 1200;
+      let w = img.width, h = img.height;
+      if (w > maxW) { h = h * maxW / w; w = maxW; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      callback(canvas.toDataURL('image/jpeg', 0.75));
+    };
+    img.src = dataUrl;
+  }
+
+  // Progress
+  function updateProgress() {
+    const nombre  = document.getElementById('nombreSelect').value;
+    const cliente = document.getElementById('clienteInput').value.trim();
+    const steps = [!!nombre, !!cliente, !!geoData, !!foto1Data, !!foto2Data];
+    const done = steps.filter(Boolean).length;
+    document.getElementById('progressFill').style.width = (done / steps.length * 100) + '%';
+    const allDone = done === steps.length;
+    document.getElementById('btnSubmit').disabled = !allDone;
+
+    // Feedback visual en slots de fotos
+    const slot1 = document.getElementById('slot1');
+    const slot2 = document.getElementById('slot2');
+    if (!foto1Data) slot1.style.borderColor = 'var(--error-dim)';
+    else slot1.style.borderColor = '';
+    if (!foto2Data) slot2.style.borderColor = 'var(--error-dim)';
+    else slot2.style.borderColor = '';
+
+    // Texto del botón según lo que falta
+    const btnSubmit = document.getElementById('btnSubmit');
+    if (!allDone) {
+      const faltantes = [];
+      if (!nombre)   faltantes.push('promotor');
+      if (!cliente)  faltantes.push('razón social');
+      if (!geoData)  faltantes.push('ubicación');
+      if (!foto1Data) faltantes.push('foto antes');
+      if (!foto2Data) faltantes.push('foto después');
+      btnSubmit.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Falta: ${faltantes.join(', ')}`;
+    } else {
+      btnSubmit.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 2 11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enviar registro`;
+    }
+  }
+
+  // Submit
+  async function submitForm() {
+    // Deshabilitar botón inmediatamente para evitar doble envío
+    const btnSubmit = document.getElementById('btnSubmit');
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/></svg> Enviando...`;
+
+    const nombre  = document.getElementById('nombreSelect').value;
+    const cliente = document.getElementById('clienteInput').value.trim();
+    const now = new Date();
+    const observaciones = document.getElementById('observaciones').value.trim();
+    const payload = {
+      rol: currentRole,
+      nombre, cliente, observaciones,
+      fecha: now.toLocaleDateString('es-AR'),
+      hora: now.toLocaleTimeString('es-AR'),
+      lat: geoData?.lat ?? 'N/A',
+      lng: geoData?.lng ?? 'N/A',
+      precision: geoData?.acc ?? 'N/A',
+      foto1: foto1Data,
+      foto2: foto2Data,
+      timestamp: now.toISOString()
+    };
+
+    showLoading('Enviando registro...');
+    try {
+      await enviarPorIframe(CONFIG.SCRIPT_URL, payload);
+      limpiarProgreso();
+      hideLoading();
+      document.getElementById('successMsg').textContent = 'Las fotos y datos fueron enviados correctamente al sistema.';
+      showScreen('successScreen');
+      window.scrollTo({ top: 0 });
+    } catch(err) {
+      hideLoading();
+      const btnSubmit = document.getElementById('btnSubmit');
+      btnSubmit.disabled = false;
+      showToast('Error al enviar. Verificá la conexión e intentá de nuevo.', 'error');
+    }
+  }
+
+  function enviarPorIframe(url, data) {
+    const jsonData = JSON.stringify(data);
+    return new Promise((resolve, reject) => {
+      const iframe = document.createElement('iframe');
+      iframe.name = 'hidden_iframe_' + Date.now();
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = url;
+      form.target = iframe.name;
+
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'data';
+      input.value = jsonData;
+      form.appendChild(input);
+      document.body.appendChild(form);
+
+      let resuelto = false;
+
+      iframe.onload = () => {
+        if (resuelto) return;
+        resuelto = true;
+        setTimeout(() => {
+          try { document.body.removeChild(form); document.body.removeChild(iframe); } catch(e) {}
+          resolve();
+        }, 500);
+      };
+
+      // Timeout de 20 segundos
+      setTimeout(() => {
+        if (resuelto) return;
+        resuelto = true;
+        try { document.body.removeChild(form); document.body.removeChild(iframe); } catch(e) {}
+        resolve(); // Resolvemos igual — asumimos que llegó
+      }, 20000);
+
+      form.submit();
+    });
+  }
+
+
+  function resetAll() {
+    limpiarProgreso();
+    foto1Data = null; foto2Data = null; geoData = null; currentRole = null;
+    document.getElementById('nombreSelect').value = '';
+    document.getElementById('clienteInput').value = '';
+    document.getElementById('slot1').classList.remove('has-photo');
+    document.getElementById('slot2').classList.remove('has-photo');
+    document.getElementById('preview1').src = '';
+    document.getElementById('preview2').src = '';
+    document.getElementById('observaciones').value = '';
+    document.getElementById('headerBadge').textContent = '—';
+    document.getElementById('headerBadge').className = 'header-badge none';
+    document.getElementById('roleStrip').className = 'role-strip';
+    // Rehabilitar botón de envío
+    const btnSubmit = document.getElementById('btnSubmit');
+    btnSubmit.disabled = false;
+    showScreen('roleScreen');
+    window.scrollTo({ top: 0 });
+  }
+
+  function showLoading(t) { document.getElementById('loadingText').textContent = t; document.getElementById('loadingOverlay').classList.add('show'); }
+  function hideLoading()  { document.getElementById('loadingOverlay').classList.remove('show'); }
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+</script>
+
+</body>
+</html>
