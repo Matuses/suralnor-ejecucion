@@ -373,6 +373,11 @@
     padding: 8px 14px;
     border-radius: 20px;
     margin-top: 8px;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  .photo-slot input[type="file"] ~ .photo-placeholder .cam-btn {
     pointer-events: none;
   }
 
@@ -678,8 +683,8 @@
           </div>
           <div class="photo-retake" onclick="retakePhoto(event, 1)">🔄 Cambiar</div>
         </div>
-        <div class="photo-slot" id="slot2">
-          <input type="file" accept="image/*" capture="environment" id="foto2Input" onchange="handlePhoto(this, 2)">
+        <div class="photo-slot" id="slot2" onclick="document.getElementById('foto2Input').click()">
+          <input type="file" accept="image/*" capture="environment" id="foto2Input" onchange="handlePhoto(this, 2)" style="display:none">
           <div class="photo-placeholder">
             <div class="cam-icon-wrap">
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -738,23 +743,31 @@
     SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwKgzqusXfCsLdc4-Rz32jYLbXNEJvjdXYpgswa9SSNCKs8ySka41lz2ezGKii1FTaOUg/exec'
   };
 
+  const _K = 'SuralNor2024';
+  function _d(s) {
+    const b = atob(s);
+    let r = '';
+    for (let i = 0; i < b.length; i++) r += String.fromCharCode(b.charCodeAt(i) ^ _K.charCodeAt(i % _K.length));
+    return r;
+  }
+
   const PROMOTORES = [
-    'AVILA EZEQUIEL',
-    'MIÑO RENZO',
-    'SANCHEZ ROCIO',
-    'FERREYRA LEONARDO',
-    'PERREN ANDREA',
-    'DIAZ VALERIA'
-  ];
+    "EiM7LS1uKih3YWd9Fjk=",
+    "HjyjLkwcKjxofw==",
+    "ADQ8IiQLNVJgf3F9HA==",
+    "FTAgMykXPTMSfHd7HTQgJSM=",
+    "AzAgMykATzN8dGBxEg==",
+    "FzwzO0wYLj53Ynt1"
+  ].map(_d);
 
   const MERCHANDS = [
-    'CRUZ CHRISTIAN',
-    'DOMINGUEZ NAHUEL',
-    'GUARAZ JUAN',
-    'SMITH RODRIGO',
-    'THEILET NICOLAS',
-    'TORRES NICOLAS'
-  ];
+    "ECcnO0wNJyB7Y2Z9Ejs=",
+    "Fzo/KCIJOjdoEHx1GyA3LQ==",
+    "FCAzMy0UTzhncXw=",
+    "ADg7NSRuPT12YntzHA==",
+    "Bz03KCALO1J8eXF7HzQh",
+    "BzogMykdTzx7c314EiY="
+  ].map(_d);
 
   let currentRole = null;
   let geoData = null;
@@ -873,7 +886,7 @@
   }
 
   function limpiarProgreso() {
-    limpiarProgreso();
+    localStorage.removeItem('progresoFormulario');
     localStorage.removeItem('progresoFoto1');
     localStorage.removeItem('progresoFoto2');
   }
