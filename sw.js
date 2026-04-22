@@ -1,4 +1,4 @@
-const CACHE = 'suralnor-v3';
+const CACHE = 'suralnor-v4';
 const ARCHIVOS = [
   '/suralnor-ejecucion/',
   '/suralnor-ejecucion/formulario_ejecucion.html',
